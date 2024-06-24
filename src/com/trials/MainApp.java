@@ -30,9 +30,9 @@ public class MainApp {
 		
 		
 		System.out.println("There are "+ noOfEmployees +" employee/s");
-		employees.stream()
-		.filter( e -> e.getAge() > 28)
-		.forEach( System.out::println);
+							employees.stream()
+									 .filter( e -> e.getAge() > 28)
+									 .forEach( System.out::println);
 		
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		
@@ -42,6 +42,12 @@ public class MainApp {
 											 .max(Integer::compare);
 		
 		maxAge.ifPresent(age-> System.out.println("The maximum age is "+ age));
+		
+		Optional<Integer> maxAge1 =	employees.stream()
+											 .map(Employee::getAge)
+											 .max(Comparator.naturalOrder());
+		
+		maxAge1.ifPresent(age-> System.out.println("The maximum age the other way is "+ age));
 		
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
        
@@ -55,10 +61,10 @@ public class MainApp {
 	System.out.println("Average age of Female Employees " + avgFemaleAge);	
 	
 	Double avgMemaleAge = employees.stream()
-		     					 .filter(e-> "M".equals(e.getGender()))
-		     					 .mapToInt(Employee::getAge)
-		     					 .average()
-		     					 .orElse(0.0);
+		     					   .filter(e-> "M".equals(e.getGender()))
+		     					   .mapToInt(Employee::getAge)
+		     					   .average()
+		     					   .orElse(0.0);
 	
 	
 	System.out.println("Average age of Male Employees " + avgMemaleAge);	
@@ -71,7 +77,8 @@ public class MainApp {
 												 .min(Integer::compare);
 	
 	
-	youngestEmployee.ifPresent(y->System.out.println("Method1: The youngest Employee's age is  " + y));
+	youngestEmployee.ifPresent( y -> System.out.println("Method1: The youngest Employee's age is  " + y)
+			                  );
 	
 	Employee employee = employees.stream()
 			                     .min(Comparator.comparingInt(Employee::getAge))
@@ -84,18 +91,21 @@ public class MainApp {
 	System.out.println(" Number of Employees in each department");
 	
 	Map<String, Long>   noOfEmpinDept = employees.stream()
-			                             .collect(Collectors.groupingBy(Employee::getDeptName,Collectors.counting()));
-	
+			                             		 .collect( Collectors.groupingBy( Employee::getDeptName,
+			                             				    		               Collectors.counting()
+			                             				    		            )
+			                             				  );
 	
 	noOfEmpinDept.forEach((depName,count)-> System.out.println("Department Name: "+depName+ ", Number of Employees: " + count ));
 	
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	System.out.println(" Highest Number of Employees in department ");
-	
+	// firstly . the map is created to store the dept names and number of employees in it 
 	Map<String,Long> noOfEmployees1 =  employees.stream()
 			                                   .collect(Collectors.groupingBy(Employee::getDeptName, Collectors.counting()));
 	
+	// Extracting the max value from each entry set of the map created above 
 	Optional<Map.Entry<String,Long>> bigDept = noOfEmployees1.entrySet()
 	            							   .stream()
 	            							   .max(Map.Entry.comparingByValue());
@@ -110,7 +120,7 @@ public class MainApp {
 	System.out.println("To find if there any Employee from HR dept ");
 
 	boolean emp = employees.stream() 
-						    .anyMatch(e->"HR".equals(e.getDeptName()));
+						   .anyMatch(e->"HR".equals(e.getDeptName()));
 																	  
 	System.out.println("Are there any employee in HR Department: " + (emp ? "Yes": "No"));
 	
@@ -129,7 +139,11 @@ public class MainApp {
              System.out.println("The Average Salary of all Departments " + avgSal);
 	
 	
-   
+             Double  avgSal1 = employees.stream()
+            		                    .collect(Collectors.averagingDouble(Employee::getSalary));
+             
+             System.out.println("The Average Salary of all Departments(other way) " + avgSal1);
+         	
 
 	
 	
@@ -141,6 +155,20 @@ public class MainApp {
     avgSalEachDept.forEach((dep , sal) -> System.out.println("Department Name: "+dep+ ", Avg Salary: " + sal));
     
    
+ /************************************************************************************************************************************
+  * 
+  * Parallel streams divide elements into several chunks and process each chunk on a different thread . By default parallelStreams()
+  * Creates thread whose count equals the number of processor available
+  * limit() and findFirst() are expensive operations cauz they are dependent on ordering of the elements, so parallel streams may not
+  * be used in that case for faster performance 
+  * 
+  ***********************************************************************************************************************************/
+    
+    Employee highlyPaidEmployee = employees.parallelStream()
+    										.max(Comparator.comparingLong(Employee::getSalary))
+    										.orElse(null);
+    
+    System.out.println("The highly paid employee in all deparrt"+ highlyPaidEmployee );											
     													  
     
 	}
